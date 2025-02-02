@@ -48,7 +48,6 @@ export default function SendMessage() {
   const [isSuggestLoading, setIsSuggestLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
    
-  //console.log("message is : ", suggestedMessages);
   const handleMessageClick = (message: string) => {
     form.setValue('content', message);
   };
@@ -82,6 +81,19 @@ export default function SendMessage() {
   const fetchSuggestedMessages = async () => {
     setIsSuggestLoading(true);
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      
+      if (!apiKey) {
+        console.error('Missing API Key GEMINI_API_KEY is not set.');
+        toast({
+          title: 'Error',
+          description: 'AI message suggestions are currently unavailable.',
+          variant: 'destructive',
+        });
+        setIsSuggestLoading(false);
+        return;
+      }
+
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
         {
@@ -98,13 +110,18 @@ export default function SendMessage() {
       );
 
       const data = await response.json();
-      //console.log("checking ai", data)
+      
       const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (generatedText) {
         setSuggestedMessages(parseStringMessages(generatedText));
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch AI-generated messages.',
+        variant: 'destructive',
+      });
     } finally {
       setIsSuggestLoading(false);
     }
@@ -187,4 +204,4 @@ export default function SendMessage() {
       </div>
     </div>
   );
-}
+} 
