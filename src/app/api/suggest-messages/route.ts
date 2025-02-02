@@ -1,37 +1,51 @@
-import OpenAI from "openai";
-import { OpenAIStream, StreamingTextResponse } from "ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export const runtime = "edge";
 
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.GEMINI_API_KEY; // Use environment variable
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: "API key is missing" }),
+        { status: 400 }
+      );
+    }
+
     const prompt =
       "Create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me, and should be suitable for a diverse audience. Avoid personal or sensitive topics, focusing instead on universal themes that encourage friendly interaction. For example, your output should be structured like this: 'What’s a hobby you’ve recently started?||If you could have dinner with any historical figure, who would it be?||What’s a simple thing that makes you happy?'. Ensure the questions are intriguing, foster curiosity, and contribute to a positive and welcoming conversational environment.";
 
-    const response = await openai.completions.create({
-      model: "gpt-3.5-turbo-instruct",
-      max_tokens: 400,
-      stream: true,
-      prompt,
+    const geminiAPI = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyDswE_zlPkgUpDnp6N4gsWxkSfz54daYVs`;
+
+    const response = await fetch(geminiAPI, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
     });
 
-    const stream = OpenAIStream(response);
-
-    return new StreamingTextResponse(stream);
-  } catch (error) {
-    if (error instanceof OpenAI.APIError) {
-      // OpenAI API error handling
-      const { name, status, headers, message } = error;
-      return NextResponse.json({ name, status, headers, message }, { status });
-    } else {
-      // General error handling
-      console.error("An unexpected error occurred:", error);
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json();
+      return new Response(JSON.stringify(errorData), { status: response.status });
     }
+
+    const data = await response.json();
+    console.log("checking data" , data)
+    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
+
+    return new Response(generatedText, {
+      headers: { "Content-Type": "text/plain" },
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return new Response(
+      JSON.stringify({ error: "Something went wrong" }),
+      { status: 500 }
+    );
   }
 }
