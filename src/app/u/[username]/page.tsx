@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -16,7 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea'; 
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import * as z from 'zod';
 import { ApiResponse } from '@/types/ApiResponse';
@@ -24,14 +24,15 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { messageSchema } from '@/schemas/messageSchema';
 
-const specialChar = '||';
-
 const parseStringMessages = (messageString: string): string[] => {
-  return messageString.split(specialChar);
+  return messageString.split('.').map(msg => msg.trim()).filter(Boolean);
 };
 
-const initialMessageString =
-  "What's your favorite movie?||Do you have any pets?||What's your dream job?";
+const initialMessages = [
+  "What's your favorite movie?",
+  "Do you have any pets?",
+  "What's your dream job?",
+];
 
 export default function SendMessage() {
   const params = useParams<{ username: string }>();
@@ -42,15 +43,14 @@ export default function SendMessage() {
   });
 
   const messageContent = form.watch('content');
-  const [suggestedMessages, setSuggestedMessages] = useState<string[]>(
-    parseStringMessages(initialMessageString)
-  );
-  const [isSuggestLoading, setIsSuggestLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-   
+
   const handleMessageClick = (message: string) => {
     form.setValue('content', message);
   };
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuggestLoading, setIsSuggestLoading] = useState(false);
+  const [suggestedMessages, setSuggestedMessages] = useState<string[]>(initialMessages);
 
   const onSubmit = async (data: z.infer<typeof messageSchema>) => {
     setIsLoading(true);
@@ -81,47 +81,24 @@ export default function SendMessage() {
   const fetchSuggestedMessages = async () => {
     setIsSuggestLoading(true);
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      
-      if (!apiKey) {
-        console.error('Missing API Key GEMINI_API_KEY is not set.');
-        toast({
-          title: 'Error',
-          description: 'AI message suggestions are currently unavailable.',
-          variant: 'destructive',
-        });
-        setIsSuggestLoading(false);
-        return;
-      }
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            prompt: {
-              text: "Generate three engaging and open-ended questions for an anonymous messaging platform. Format them as a single string separated by '||'.",
-            },
-          }),
-        }
-      );
-
-      const data = await response.json();
-      
-      const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (generatedText) {
-        setSuggestedMessages(parseStringMessages(generatedText));
+      const response = await axios.post('/api/suggest-messages', {
+        input: "Suggest some anonymous messages for social media in one line only should be short and ends with a full stop with no star sign in the front",
+      });
+        console.log(response.data.response)
+      if (response.data.response) {
+        const newMessages = parseStringMessages(response.data.response);
+        setSuggestedMessages(
+          response.data.response
+            .split('.')
+            .map((msg: string) => msg.trim()) // Adding type annotation for msg
+            .filter(Boolean)
+        );
+      } else {
+        setSuggestedMessages(['No suggestions available.']);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch AI-generated messages.',
-        variant: 'destructive',
-      });
+      setSuggestedMessages(['Failed to fetch suggestions.']);
     } finally {
       setIsSuggestLoading(false);
     }
@@ -139,7 +116,7 @@ export default function SendMessage() {
             name="content"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Send Anonymous Captions idea to @{username}</FormLabel>
+                <FormLabel>Send Anonymous Message to @{username}</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Write your anonymous message here"
@@ -173,7 +150,11 @@ export default function SendMessage() {
             className="my-4"
             disabled={isSuggestLoading}
           >
-            Suggest Messages
+            {isSuggestLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              'Suggest Messages'
+            )}
           </Button>
           <p>Click on any message below to select it.</p>
         </div>
@@ -182,16 +163,20 @@ export default function SendMessage() {
             <h3 className="text-xl font-semibold">Messages</h3>
           </CardHeader>
           <CardContent className="flex flex-col space-y-4">
-            {suggestedMessages.map((message, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="mb-2"
-                onClick={() => handleMessageClick(message)}
-              >
-                {message}
-              </Button>
-            ))}
+            {suggestedMessages.length === 0 ? (
+              <p>No suggested messages yet.</p>
+            ) : (
+              suggestedMessages.map((message, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="mb-2"
+                  onClick={() => handleMessageClick(message)}
+                >
+                  {message}
+                </Button>
+              ))
+            )}
           </CardContent>
         </Card>
       </div>
@@ -204,4 +189,4 @@ export default function SendMessage() {
       </div>
     </div>
   );
-} 
+}
