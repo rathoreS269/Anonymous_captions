@@ -14,40 +14,40 @@ function Navbar() {
 
   return (
     <nav className="p-4 md:p-6 shadow-md bg-gray-900 text-white">
-      <div className="container mx-auto flex items-center justify-between">
+      <div className="container mx-auto flex flex-wrap items-center justify-between gap-y-4">
         
         {/* Left: Website Title */}
         <a href="#" className="text-xl font-bold">
           Anonymous Captions
         </a>
 
-        {/* Center: Welcome Message (Use flex-grow for centering) */}
+        {/* Center: Welcome Message */}
         {session && (
-          <span className="flex-grow text-center text-lg">
+          <span className="w-full md:w-auto text-center text-lg md:flex-grow">
             Welcome, {user.username || user.email}
           </span>
         )}
 
         {/* Right: Buttons */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2 md:gap-4">
           {session ? (
             <>
               <Button
                 onClick={() => router.push('/social-share')}
-                className="bg-gray-800 text-white"
+                className="bg-gray-800 text-white w-full md:w-auto"
               >
                 Social Share
               </Button>
               <Button
                 onClick={() => signOut()}
-                className="bg-gray-800 text-white"
+                className="bg-gray-800 text-white w-full md:w-auto"
               >
                 Logout
               </Button>
             </>
           ) : (
             <Link href="/sign-in">
-              <Button className="bg-slate-100 text-black" variant="outline">
+              <Button className="bg-slate-100 text-black w-full md:w-auto" variant="outline">
                 Login
               </Button>
             </Link>
