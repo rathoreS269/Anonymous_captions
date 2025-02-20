@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Mail } from 'lucide-react';
+import { Mail } from 'lucide-react'; // Assuming you have an icon for messages
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Autoplay from 'embla-carousel-autoplay';
 import messages from '@/messages.json';
@@ -26,7 +26,7 @@ export default function Home() {
             Dive into the World of Anonymous Captions
           </h1>
           <p className="mt-3 md:mt-4 text-base md:text-lg">
-            Give Captions Idea - Where your identity remains a secret.
+            Anonymous Captions - Where your identity remains a secret.
           </p>
         </section>
 
