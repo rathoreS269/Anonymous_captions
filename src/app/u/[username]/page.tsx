@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import axios, { AxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -24,9 +24,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { messageSchema } from '@/schemas/messageSchema';
 
-const parseStringMessages = (messageString: string): string[] => {
-  return messageString.split('.').map(msg => msg.trim()).filter(Boolean);
-};
+// const parseStringMessages = (messageString: string): string[] => {
+//   return messageString.split('.').map(msg => msg.trim()).filter(Boolean);
+// };
 
 const initialMessages = [
   "What's your favorite movie?",
@@ -86,7 +86,7 @@ export default function SendMessage() {
       });
         console.log(response.data.response)
       if (response.data.response) {
-        const newMessages = parseStringMessages(response.data.response);
+       // const newMessages = parseStringMessages(response.data.response);
         setSuggestedMessages(
           response.data.response
             .split('.')

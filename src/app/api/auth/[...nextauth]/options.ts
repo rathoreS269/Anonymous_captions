@@ -16,6 +16,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials: any): Promise<any> {
         await dbConnect();
         try {
+            // @ts-ignore
           const user = await UserModel.findOne({
             $or: [
               { email: credentials.identifier },
@@ -38,6 +39,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Incorrect password');
           }
         } catch (err: any) {
+            // @ts-ignore
           throw new Error(err);
         }
       },
