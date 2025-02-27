@@ -105,8 +105,9 @@ export default function SendMessage() {
   };
 
   return (
-    <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl">
-      <h1 className="text-4xl font-bold mb-6 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0e1f31] to-gray-600">
+    <div className="container mx-auto my-8 p-6 bg-gradient-to-b from-[#193247] to-gray-400 shadow-lg rounded-lg max-w-4xl">
+      <h1 className="text-4xl font-bold mb-6 text-center text-black">
         Public Profile Link
       </h1>
       <Form {...form}>
@@ -116,11 +117,13 @@ export default function SendMessage() {
             name="content"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Send Anonymous Message to @{username}</FormLabel>
+                <FormLabel className="text-black">
+                  Send Anonymous Message to @{username}
+                </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Write your anonymous message here"
-                    className="resize-none"
+                    className="resize-none border-gray-400 text-black"
                     {...field}
                   />
                 </FormControl>
@@ -144,7 +147,7 @@ export default function SendMessage() {
       </Form>
 
       <div className="space-y-4 my-8">
-        <div className="space-y-2">
+        <div className="space-y-2 text-black">
           <Button
             onClick={fetchSuggestedMessages}
             className="my-4"
@@ -158,19 +161,19 @@ export default function SendMessage() {
           </Button>
           <p>Click on any message below to select it.</p>
         </div>
-        <Card>
+        <Card className="bg-gradient-to-b from-navy-800 to-gray-600 text-white border-none shadow-lg">
           <CardHeader>
-            <h3 className="text-xl font-semibold">Messages</h3>
+            <h3 className="text-xl font-semibold text-black">Messages</h3>
           </CardHeader>
           <CardContent className="flex flex-col space-y-4">
             {suggestedMessages.length === 0 ? (
-              <p>No suggested messages yet.</p>
+              <p className="text-black">No suggested messages yet.</p>
             ) : (
               suggestedMessages.map((message, index) => (
                 <Button
                   key={index}
                   variant="outline"
-                  className="mb-2"
+                  className="mb-2 border-gray-400 text-black"
                   onClick={() => handleMessageClick(message)}
                 >
                   {message}
@@ -181,12 +184,13 @@ export default function SendMessage() {
         </Card>
       </div>
       <Separator className="my-6" />
-      <div className="text-center">
+      <div className="text-center text-black">
         <div className="mb-4">Get Your Message Board</div>
         <Link href={'/sign-up'}>
           <Button>Create Your Account</Button>
         </Link>
       </div>
     </div>
+   </div>
   );
 }
