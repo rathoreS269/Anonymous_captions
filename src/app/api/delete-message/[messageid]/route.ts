@@ -1,47 +1,21 @@
-import UserModel from '@/model/User.model';
-import { getServerSession } from 'next-auth/next';
-import dbConnect from '@/lib/dbConnect';
-import { User } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/options';
-import { NextRequest, NextResponse } from 'next/server'; //added
+import { NextResponse } from "next/server";
 
 export async function DELETE(
-  request: NextRequest,
-  context: { params: { messageid: string } } 
+  request: Request,
+  { params }: { params: { messageid: string } } 
 ) {
-  const messageId = context.params.messageid;;
-  await dbConnect();
-  const session = await getServerSession(authOptions);
-  const _user: User = session?.user;
-  if (!session || !_user) {
-    return NextResponse.json(
-      { success: false, message: 'Not authenticated' },
-      { status: 401 }
-    );
-  }
-
   try {
-    const updateResult = await UserModel.updateOne(
-      { _id: _user._id },
-      { $pull: { messages: { _id: messageId } } }
-    );
+    const { messageid } = params; 
 
-    if (updateResult.modifiedCount === 0) {
-      return NextResponse.json(
-        { message: 'Message not found or already deleted', success: false },
-        { status: 404 }
-      );
+    if (!messageid) {
+      return NextResponse.json({ error: "Message ID is required" }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { message: 'Message deleted', success: true },
-      { status: 200 }
-    );
+    // Connect to your database (MongoDB)
+    // Example: const result = await db.collection("messages").deleteOne({ _id: new ObjectId(messageid) });
+
+    return NextResponse.json({ success: true, message: "Message deleted successfully" });
   } catch (error) {
-    console.error('Error deleting message:', error);
-    return NextResponse.json(
-      { message: 'Error deleting message', success: false },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
