@@ -75,7 +75,10 @@ export default function SignUpForm() {
         description: response.data.message,
       });
 
-      router.replace(`/verify/${username}`);
+      // router.replace(`/verify/${username}`);
+      console.log("Sign-up response:", response.data);
+      router.push(`/verify/${data.username}`);
+
 
       setIsSubmitting(false);
     } catch (error) {
