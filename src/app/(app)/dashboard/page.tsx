@@ -23,6 +23,7 @@ function UserDashboard() {
   const [isSwitchLoading, setIsSwitchLoading] = useState(false);
 
   const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
 
   const handleDeleteMessage = (messageId: string) => {
     setMessages(messages.filter((message) => message._id !== messageId));
@@ -147,8 +148,9 @@ function UserDashboard() {
             disabled
             className="input input-bordered w-full p-2 mr-2"
           />
-          <Button onClick={copyToClipboard}>Copy</Button>
+          <Button onClick={copyToClipboard}  className="bg-black text-white px-4 py-2  hover:bg-blue-900 rounded-md transition">Copy</Button>
         </div>
+        <p className="text-xs text-gray-400 mt-1">Get your captions using this URL</p>
       </div>
 
       <div className="mb-4">

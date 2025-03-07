@@ -17,9 +17,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
 import { signInSchema } from '@/schemas/signInSchema';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export default function SignInForm() {
   const router = useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -29,8 +33,9 @@ export default function SignInForm() {
     },
   });
 
-  const { toast } = useToast();
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
+    setIsSubmitting(true);
+    
     const result = await signIn('credentials', {
       redirect: false,
       identifier: data.identifier,
@@ -38,19 +43,15 @@ export default function SignInForm() {
     });
 
     if (result?.error) {
-      if (result.error === 'CredentialsSignin') {
-        toast({
-          title: 'Login Failed',
-          description: 'Incorrect username or password',
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Error',
-          description: result.error,
-          variant: 'destructive',
-        });
-      }
+      toast({
+        title: 'Sign In Failed',
+        description: result.error === 'CredentialsSignin' 
+          ? 'Invalid email or password. Please try again.' 
+          : result.error,
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
     }
 
     if (result?.url) {
@@ -60,7 +61,7 @@ export default function SignInForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-800">
-      <div className="w-full max-w-md p-8 space-y-8 bg-gray-200 rounded-lg shadow-md">
+      <div className="w-full max-w-md p-8 space-y-6 bg-gray-200 rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold tracking-tight lg:text-4xl mb-6">
             Welcome Back to Anonymous Captions
@@ -91,7 +92,16 @@ export default function SignInForm() {
                 </FormItem>
               )}
             />
-            <Button className='w-full' type="submit">Sign In</Button>
+            <Button className="w-full" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
           </form>
         </Form>
         <div className="text-center mt-4">

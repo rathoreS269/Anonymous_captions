@@ -71,25 +71,20 @@ export default function SignUpForm() {
       const response = await axios.post<ApiResponse>('/api/sign-up', data);
 
       toast({
-        title: 'Success',
-        description: response.data.message,
+        title: 'Account Created',
+        description: 'You can now sign in!',
       });
 
-      // router.replace(`/verify/${username}`);
-      console.log("Sign-up response:", response.data);
-      router.push(`/verify/${data.username}`);
-
+      console.log('Sign-up response:', response.data);
+      router.push('/sign-in'); // 🔥 CHANGED
 
       setIsSubmitting(false);
     } catch (error) {
       console.error('Error during sign-up:', error);
 
       const axiosError = error as AxiosError<ApiResponse>;
-
-      // Default error message
       const errorMessage =
-      axiosError.response?.data.message ?? 'There was a problem with your sign-up. Please try again.';
-    
+        axiosError.response?.data.message ?? 'There was a problem with your sign-up. Please try again.';
 
       toast({
         title: 'Sign Up Failed',
@@ -148,12 +143,10 @@ export default function SignUpForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <Input {...field} name="email" />
-                  <p className='text-muted text-gray-700 text-sm'>We will send you a verification code</p>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               name="password"
               control={form.control}
@@ -165,7 +158,7 @@ export default function SignUpForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className='w-full' disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
